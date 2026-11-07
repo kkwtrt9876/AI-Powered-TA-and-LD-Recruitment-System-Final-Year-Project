@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 700px;
+      position: relative;
+    }
+    h2, h3 {
+      text-align: center;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      font-weight: bold;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .edit-btn {
+      background: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 8px 15px;
+      margin-top: 10px;
+    }
+    .add-semester-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    /* Semester Card Styles */
+    #semestersList {
+      margin-top: 20px;
+    }
+    .semester-card {
+      background: #f9f9f9;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .semester-card:hover {
+      transform: scale(1.02);
+      background: #f1f1f1;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none; /* hidden by default */
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    th {
+      background: #007BFF;
+      color: white;
+    }
+
+    .flash {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .flash.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .flash.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Update Profile</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div>
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="form-group">
+        <label for="department">Department</label>
+        
+        {% if department %}
+          <!-- Existing student -->
+          {% if editable %}
+            <select name="department" required>
+              {% for dep in departments %}
+                <option value="{{ dep.dep_id }}" {% if dep.dep_name == department %}selected{% endif %}>
+                  {{ dep.dep_name }}
+                </option>
+              {% endfor %}
+            </select>
+          {% else %}
+            <p>{{ department }}</p>
+            <button type="submit" name="edit" value="true" class="edit-btn">Edit</button>
+          {% endif %}
+        
+        {% else %}
+          <!-- New student -->
+          <select name="department" required>
+            {% for dep in departments %}
+              <option value="{{ dep.dep_name }}">{{ dep.dep_name }}</option>
+            {% endfor %}
+          </select>
+        {% endif %}
+      </div>
+      
+      {% if not department or editable %}
+      <button type="submit" name="save" value="true">Save</button>
+      {% endif %}
+    </form>
+
+    <!-- Add Semester button -->
+    <button class="add-semester-btn" onclick="openModal()">Add Semester</button>
+
+    <h3>Saved Semesters</h3>
+    <div id="semestersList">
+      {% for sem, data in semester_courses.items() %}
+        <div class="semester-card" onclick="openSemesterModal('{{ sem }}')">
+          <strong>{{ sem }}</strong>
+        </div>
+
+        <!-- Modal for each semester -->
+        <div id="modal_{{ sem }}" class="modal">
+          <div class="modal-content">
+            <span class="close" onclick="closeSemesterModal('{{ sem }}')">&times;</span>
+            <h3>{{ sem }}</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Course Name</th>
+                  <th>Credit Hours</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course in data if course is mapping %} 
+                <!-- only loop through course dicts -->
+                <tr>
+                  <td>{{ course.course }}</td>
+                  <td>{{ course.credit }}</td>
+                  <td>{{ course.grade }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <p><strong>SGPA:</strong> {{ data[-1] }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <!-- Add Semester Modal -->
+<div id="semesterModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Add Semester</h3>
+    <form method="POST" action="/add_semester/{{ username }}">
+      
+      <div class="form-group">
+        <label for="semester_id">Semester</label>
+        <select name="semester_id" required>
+          {% for sem in semester_ids %}
+            <option value="{{ sem.semester_id }}">{{ sem.semester_id }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <h4>Courses</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Course Name</th>
+            <th>Credit Hours</th>
+            <th>Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(10) %}
+          <tr>
+            <!-- Course dropdown -->
+            <td>
+              <select name="course_{{ i }}" class="course-select">
+                <option value="">None</option>
+                {% for course in courses %}
+                  <option value="{{ course.column_name }}">{{ course.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+
+            <!-- Credit Hours dropdown -->
+            <td>
+              <select name="credit_{{ i }}">
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+              </select>
+            </td>
+
+            <!-- Grade dropdown -->
+            <td>
+              <select name="grade_{{ i }}">
+                <option value="A+">A+</option>
+                <option value="A">A</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B">B</option>
+                <option value="B-">B-</option>
+                <option value="C+">C+</option>
+                <option value="C">C</option>
+                <option value="C-">C-</option>
+                <option value="D+">D+</option>
+                <option value="D">D</option>
+                <option value="F">F</option>  
+              </select>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- SGPA input -->
+      <div class="form-group">
+        <label for="sgpa">SGPA</label>
+        <input type="number" name="sgpa" step="0.01" min="0" max="4" placeholder="Enter SGPA" required>
+      </div>
+
+      <br>
+      <button type="submit">Save Semester</button>
+    </form>
+  </div>
+</div>
+
+
+  <script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+    const selects = document.querySelectorAll(".course-select");
+
+    function updateOptions() {
+      // collect all selected values
+      const selected = Array.from(selects)
+        .map(s => s.value)
+        .filter(v => v !== "");
+
+      selects.forEach(select => {
+        Array.from(select.options).forEach(option => {
+          if (option.value && selected.includes(option.value) && option.value !== select.value) {
+            option.disabled = true;   // disable if already chosen elsewhere
+          } else {
+            option.disabled = false;  // enable if not chosen
+          }
+        });
+      });
+    }
+
+    // run on change
+    selects.forEach(select => {
+      select.addEventListener("change", updateOptions);
+    });
+
+    // run once on page load
+    updateOptions();
+  });
+
+
+
+    function openSemesterModal(sem) {
+      document.getElementById("modal_" + sem).style.display = "block";
+    }
+    function closeSemesterModal(sem) {
+      document.getElementById("modal_" + sem).style.display = "none";
+    }
+    function openModal() {
+      document.getElementById("semesterModal").style.display = "block";
+    }
+    function closeModal() {
+      document.getElementById("semesterModal").style.display = "none";
+    }
+    window.onclick = function(event) {
+      let modals = document.querySelectorAll(".modal");
+      modals.forEach(m => {
+        if (event.target == m) {
+          m.style.display = "none";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View LD Results</title>
+
+  <style>
+    :root{
+      --bg:#e0e4e8;
+      --card:#f9f9fb;
+      --accent:#4a90e2;
+      --muted:#333;
+      --radius:16px;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      padding:32px;
+      min-height:100vh;
+      background:var(--bg);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      color:var(--muted);
+    }
+
+    /* Metallic Header */
+    header{
+      width:100%;
+      max-width:960px;
+      background:linear-gradient(135deg, #ffffff, #d1d5db);
+      padding:20px;
+      text-align:center;
+      font-size:24px;
+      font-weight:700;
+      border-radius:var(--radius);
+      color:#222;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom:25px;
+    }
+
+    /* Metallic Card Container */
+    .container{
+      width:100%;
+      max-width:960px;
+      background:linear-gradient(145deg, #ffffff, #e3e6eb);
+      padding:30px;
+      border-radius:var(--radius);
+      box-shadow:
+        4px 4px 12px rgba(0,0,0,0.1),
+        -4px -4px 12px rgba(255,255,255,0.7);
+      border:1px solid rgba(0,0,0,0.05);
+      text-align:center;
+    }
+
+    h2{
+      color:#222;
+      font-size:20px;
+      margin-bottom:20px;
+    }
+
+    /* Flash Messages Metallic */
+    .flash-message{
+      padding:0;
+      margin-bottom:20px;
+      list-style:none;
+    }
+
+    .flash-message li{
+      padding:12px;
+      margin:8px 0;
+      border-radius:var(--radius);
+      font-size:16px;
+      font-weight:600;
+      background:white;
+      box-shadow:
+        3px 3px 8px rgba(0,0,0,0.1),
+        -3px -3px 8px rgba(255,255,255,0.7);
+    }
+
+    .flash-warning{ color:#d9534f; }
+    .flash-success{ color:#28a745; }
+
+    /* Metallic UL List */
+    ul{
+      padding:0;
+      list-style:none;
+      margin-top:20px;
+    }
+
+    li{
+      background:linear-gradient(145deg, #ffffff, #e3e6eb);
+      margin:10px 0;
+      padding:15px;
+      border-radius:var(--radius);
+      font-size:18px;
+      font-weight:500;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:
+        4px 4px 12px rgba(0,0,0,0.1),
+        -4px -4px 12px rgba(255,255,255,0.7);
+      border:1px solid rgba(0,0,0,0.05);
+      transition:0.25s ease;
+      color:#222;
+    }
+
+    li.selected{
+      background:linear-gradient(135deg, #d4edda, #b7e4c7);
+      border:1px solid #28a745;
+      transform:scale(1.01);
+    }
+
+    .message{
+      margin-top:20px;
+      font-size:18px;
+      color:#d9534f;
+      font-weight:700;
+    }
+
+    /* Metallic Submit Button */
+    .submit-btn{
+      margin-top:20px;
+      padding:12px 24px;
+      border:none;
+      border-radius:12px;
+      font-size:16px;
+      font-weight:600;
+      color:white;
+      background:#28a745;
+      cursor:pointer;
+      transition:0.25s ease;
+      box-shadow:0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    .submit-btn:hover{
+      background:#218838;
+      transform:scale(1.03);
+    }
+
+    input[type="checkbox"]{
+      transform:scale(1.2);
+      cursor:pointer;
+    }
+  </style>
+
+</head>
+<body>
+
+<header>LD Results</header>
+
+<div class="container">
+
+  <h2>Results for {{ username }}</h2>
+
+  {% with messages = get_flashed_messages(True) %}
+  {% if messages %}
+    <ul class="flash-message">
+      {% for category, message in messages %}
+        <li class="flash-{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% endwith %}
+
+  {% if results %}
+    <p style="font-size:18px; color:#222; margin-bottom:15px;">
+      🎉 Congratulations! You have been selected as LD for the following courses:
+    </p>
+
+    <form method="POST" action="/submit_ld_selection/{{ username }}">
+      <ul id="courseList">
+
+        {% for course in results %}
+        <li class="{% if course.is_selected %}selected{% endif %}">
+          {{ course.name }} - <strong>{{ course.section }}</strong>
+
+
+          <input type="hidden" name="courses[{{ course.column_name }}]" value="0">
+
+          <input type="checkbox"
+                 name="courses[{{ course.column_name }}]"
+                 value="1"
+                 onchange="toggleSelection(this)"
+                 {% if course.is_selected %}checked{% endif %}>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <button type="submit" class="submit-btn">Submit</button>
+    </form>
+
+  {% else %}
+    <p class="message"></p>
+  {% endif %}
+
+</div>
+
+<script>
+  function toggleSelection(checkbox){
+    const li = checkbox.closest("li");
+
+    if(checkbox.checked){
+      li.classList.add("selected");
+    } else {
+      li.classList.remove("selected");
+    }
+
+    // limit 2 selections
+    const selected = document.querySelectorAll('input[type="checkbox"]:checked');
+    if(selected.length > 2){
+      alert("You can select a maximum of 2 courses.");
+      checkbox.checked = false;
+      li.classList.remove("selected");
+    }
+  }
+</script>
+
+</body>
+</html>

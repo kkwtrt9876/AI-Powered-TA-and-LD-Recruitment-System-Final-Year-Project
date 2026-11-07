@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View LD Results</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #007BFF;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .container {
+      margin: 30px auto;
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+    li {
+      background: #f4f4f4;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.2s;
+    }
+    li.selected {
+      background: #d4edda;
+      border: 1px solid #28a745;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #d9534f;
+      font-weight: bold;
+    }
+    .submit-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 16px;
+    }
+    .submit-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <header>LD Results</header>
+  <div class="container">
+    <h2>Results for {{ username }}</h2>
+
+    {% if results %}
+      <p>🎉 Congratulations! You have been selected as LD for the following courses:</p>
+      <form method="POST" action="/submit_ld_selection/{{ username }}" onsubmit="return validateSelection()">
+        <ul id="courseList">
+          {% for course in results %}
+            <li class="{% if course.is_selected %}selected{% endif %}">
+              {{ course.name }}
+              <input type="checkbox" 
+                    name="selected_courses" 
+                    value="{{ course.column_name }}" 
+                    onchange="toggleSelection(this)"
+                    {% if course.is_selected %}checked{% endif %}>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
+
+    {% else %}
+      <p class="message">Sorry, you have not been selected this semester.</p>
+    {% endif %}
+  </div>
+
+  <script>
+    function toggleSelection(checkbox) {
+      const li = checkbox.closest("li");
+      if (checkbox.checked) {
+        li.classList.add("selected");
+      } else {
+        li.classList.remove("selected");
+      }
+
+      // enforce max 2 selections
+      const selected = document.querySelectorAll('input[name="selected_courses"]:checked');
+      if (selected.length > 2) {
+        alert("You can select a maximum of 2 courses.");
+        checkbox.checked = false;
+        li.classList.remove("selected");
+      }
+    }
+
+    function validateSelection() {
+      const selected = document.querySelectorAll('input[name="selected_courses"]:checked');
+      if (selected.length === 0) {
+        alert("Please select at least one course before submitting.");
+        return false;
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>

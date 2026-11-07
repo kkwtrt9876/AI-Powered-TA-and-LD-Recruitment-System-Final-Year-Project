@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Allocation Results</title>
+  <style>
+    :root {
+      --bg: #e0e4e8;
+      --card: #f9f9fb;
+      --accent: #4a90e2;
+      --muted: #555;
+      --radius: 16px;
+      --shadow: 4px 4px 12px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.7);
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    header {
+      width: 100%;
+      background: linear-gradient(135deg, #ffffff, #d1d5db);
+      border-radius: var(--radius);
+      padding: 20px 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+      color: #222;
+    }
+
+    .filter-select {
+      padding: 10px 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: white;
+      font-weight: 600;
+      color: #222;
+      box-shadow: inset 1px 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .card {
+      background: linear-gradient(145deg, #ffffff, #e3e6eb);
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      font-size: 13px;
+      border-bottom: 1px solid #eee;
+      color: #222;
+    }
+
+    th {
+      background: #f1f3f5;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover td {
+      background: #fcfcfc;
+    }
+
+    .view-btn {
+      display: inline-block;
+      padding: 5px 10px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .view-btn:hover {
+      background: #357abd;
+      transform: translateY(-1px);
+    }
+
+    .badge-count {
+      padding: 4px 8px;
+      background: #6c757d;
+      color: white;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Lab Allocation Results</h1>
+    <select id="filterSelect" class="filter-select">
+      <option value="all" selected>All Allocations</option>
+      <option value="complete">Complete (2 LDs)</option>
+      <option value="half">Partial (1 LD)</option>
+      <option value="none">None (0 LDs)</option>
+    </select>
+  </header>
+
+  <div class="card">
+    <div class="table-container">
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>Semester</th>
+            <th>Lab Name</th>
+            <th>Instructor</th>
+            <th>LD 1 (ID)</th>
+            <th>LD 1 (Email)</th>
+            <th>Conf (1)</th>
+            <th>Assets (1)</th>
+            <th>LD 2 (ID)</th>
+            <th>LD 2 (Email)</th>
+            <th>Conf (2)</th>
+            <th>Assets (2)</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in results %}
+          <tr>
+            <td>{{ row.semester }}</td>
+            <td><strong>{{ row.lab_name }}</strong></td>
+            <td>{{ row.lab_instructor }}</td>
+            <td>{{ row.s_id_one or '-' }}</td>
+            <td style="font-size:11px;">{{ row.email_one or '-' }}</td>
+            <td>{{ row.confirmed_one }}</td>
+            <td>
+              {% if row.submission_files_path %}
+                <a href="/view_submission/{{ row.submission_files_path | replace('\\', '/') }}" target="_blank" class="view-btn">View</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{{ row.s_id_two or '-' }}</td>
+            <td style="font-size:11px;">{{ row.email_two or '-' }}</td>
+            <td>{{ row.confirmed_two }}</td>
+            <td>
+              {% if row.submission_files_path1 %}
+                <a href="/view_submission/{{ row.submission_files_path1| replace('\\', '/') }}" target="_blank" class="view-btn">View</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td><span class="badge-count">{{ row.allocation_count }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("filterSelect").addEventListener("change", function() {
+    const filter = this.value;
+    const rows = document.querySelectorAll("#resultsTable tbody tr");
+
+    rows.forEach(row => {
+        const allocationCount = parseInt(row.querySelector(".badge-count").innerText);
+        let show = true;
+
+        if (filter === "complete" && allocationCount !== 2) show = false;
+        if (filter === "half" && allocationCount !== 1) show = false;
+        if (filter === "none" && allocationCount !== 0) show = false;
+
+        row.style.display = show ? "" : "none";
+    });
+});
+</script>
+</body>
+</html>

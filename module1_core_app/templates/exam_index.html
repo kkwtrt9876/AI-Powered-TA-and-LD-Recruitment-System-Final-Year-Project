@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Exam Proctor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/exam_style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="main-content">
+            <!-- Global Progress Bar -->
+            <div id="progress-container" class="progress-container hidden">
+                <div class="progress-track">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <div class="progress-steps">
+                    <span class="step-label" id="step-mcq">MCQs</span>
+                    <span class="step-label" id="step-short">Short Answers</span>
+                    <span class="step-label" id="step-coding">Coding</span>
+                    <span class="step-label" id="step-submit">Finish</span>
+                </div>
+            </div>
+
+            <!-- Setup & Course Selection -->
+            <div id="setup-panel" class="panel active">
+                <h1>Welcome to AI Exam</h1>
+                <div class="input-group">
+                    <label>Student ID / Name</label>
+                    <input type="text" id="student-id" placeholder="Enter your ID or Name">
+                </div>
+                <div class="input-group">
+                    <label>Select Course</label>
+                    <select id="course-select">
+                        <option value="">Loading courses...</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Applying For</label>
+                    <div class="role-selector">
+                        <label class="role-option">
+                            <input type="radio" name="role" id="role-ta" value="ta" checked>
+                            <div class="role-card">
+                                <i class="material-icons">school</i>
+                                <span class="role-title">Teacher Assistant (TA)</span>
+                                <span class="role-desc">MCQs + Short Questions</span>
+                            </div>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" name="role" id="role-ld" value="ld">
+                            <div class="role-card">
+                                <i class="material-icons">code</i>
+                                <span class="role-title">Lab Demonstrator (LD)</span>
+                                <span class="role-desc">MCQs + Short Questions + Coding</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <button id="setup-btn" class="primary-btn" disabled>Proceed</button>
+            </div>
+
+            <!-- Instructions Panel -->
+            <div id="instruction-panel" class="panel hidden">
+                <h1>Exam Instructions</h1>
+                <div class="instructions-content">
+                    <h2>Please read carefully:</h2>
+                    <ul>
+                        <li><strong>Duration:</strong> You have exactly 5 minutes to complete the exam.</li>
+                        <li><strong>Format:</strong> <span id="format-description">The exam consists of 5 Multiple
+                                Choice Questions (MCQs) and 5 Short Answer Questions.</span></li>
+                        <li><strong>Fullscreen Policy:</strong> The exam MUST be taken in Fullscreen mode. Exiting
+                            fullscreen at ANY time will result in <strong>immediate auto-submission</strong>.</li>
+                        <li><strong>Monitoring:</strong>
+                            <ul>
+                                <li>Video and Audio will be recorded throughout the exam.</li>
+                                <li>Tab switching is monitored and will trigger auto-submission.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="warning-box">
+                        <i class="material-icons">warning</i>
+                        <p>By clicking "Start Test", you agree to enter Fullscreen mode. Any attempt to exit will submit
+                            your exam.</p>
+                    </div>
+                </div>
+                <button id="start-test-btn" class="primary-btn">Start Test</button>
+            </div>
+
+            <!-- MCQ Panel -->
+            <div id="mcq-panel" class="panel hidden">
+                <h2>Multiple Choice Questions</h2>
+                <div id="mcq-container"></div>
+                <button id="next-btn" class="primary-btn">Next: Short Answers</button>
+            </div>
+
+            <!-- Short Answers Panel -->
+            <div id="short-answer-panel" class="panel hidden">
+                <h2>Short Answer Questions</h2>
+                <div id="short-answer-container"></div>
+                <button id="short-next-btn" class="primary-btn">Next</button>
+            </div>
+
+            <!-- Coding Panel (LD only) -->
+            <div id="coding-panel" class="panel hidden">
+                <h2><i class="material-icons" style="vertical-align:middle;margin-right:8px;">terminal</i>Coding
+                    Challenge</h2>
+                <div id="coding-question-box" class="coding-question-card">
+                    <div class="loading-text">Loading question...</div>
+                </div>
+
+                <div class="code-editor-section">
+                    <div class="editor-toolbar">
+                        <div class="language-tabs">
+                            <button class="lang-tab active" data-lang="python">🐍 Python</button>
+                            <button class="lang-tab" data-lang="cpp">⚙️ C++</button>
+                            <button class="lang-tab" data-lang="java">☕ Java</button>
+                        </div>
+                        <button id="run-btn" class="run-btn">
+                            <i class="material-icons">play_arrow</i> Run Code
+                        </button>
+                    </div>
+                    <textarea id="code-editor" class="code-editor" spellcheck="false"
+                        placeholder="// Write your code here..."></textarea>
+                    <div class="output-section">
+                        <div class="output-header">
+                            <i class="material-icons">terminal</i>
+                            <span>Output</span>
+                            <span id="run-status" class="run-status"></span>
+                        </div>
+                        <pre id="code-output" class="code-output">// Your program output will appear here...</pre>
+                    </div>
+                </div>
+
+                <button id="submit-exam-btn" class="primary-btn" style="margin-top:1.5rem;">Submit Exam</button>
+            </div>
+
+
+        </div>
+
+        <!-- Video Sidebar -->
+        <div class="video-sidebar">
+            <div class="video-container">
+                <video id="user-video" autoplay muted playsinline></video>
+                <div class="recording-indicator hidden" id="rec-indicator">
+                    <span class="dot"></span> REC
+                </div>
+            </div>
+
+            <div id="global-timer" class="timer-display hidden">Time Left: 05:00</div>
+
+            <div class="controls">
+                <button class="control-btn"><i class="material-icons">mic</i></button>
+                <button class="control-btn"><i class="material-icons">videocam</i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <i class="material-icons warning-icon">help_outline</i>
+            <h2 id="confirm-title">Submit Exam?</h2>
+            <p id="confirm-message">Are you sure you want to submit your test? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button id="confirm-cancel-btn" class="primary-btn"
+                    style="background:rgba(255,255,255,0.05); color:var(--text-secondary); box-shadow:none;">Cancel</button>
+                <button id="confirm-proceed-btn" class="primary-btn">Yes, Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Warning Modal -->
+    <div id="warning-modal" class="modal">
+        <div class="modal-content" style="border-color: var(--danger);">
+            <i class="material-icons warning-icon" style="color: var(--danger);">warning</i>
+            <h2>Security Breach!</h2>
+            <p id="warning-message">You have left the proctored environment. This incident will be reported.</p>
+            <div class="modal-actions">
+                <button id="return-fullscreen-btn" class="primary-btn">Return to Test</button>
+                <button id="agree-submit-btn" class="danger-btn">Agree &amp; Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-playback" controls style="display:none;"></audio>
+
+    <script src="{{ url_for('static', filename='js/exam_main.js') }}"></script>
+</body>
+
+</html>

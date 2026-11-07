@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TA and LD Recruitment System</title>
+<style>
+:root{
+  --bg:#e0e4e8;       
+  --accent:#4a90e2;   
+  --muted:#555;       
+  --radius:16px;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Body with animated gradient */
+body {
+  min-height:100vh;
+  background: linear-gradient(-45deg, #e0e4e8, #f4f6f8, #dbe6f2, #f0f4f8);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-family);
+  overflow: hidden;
+  position: relative;
+}
+
+@keyframes gradientShift {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+/* Central container */
+.container {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px) saturate(180%);
+  border-radius: var(--radius);
+  padding: 30px 40px;
+  width: 380px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 0 16px rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.3);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInScale 0.8s ease forwards;
+  z-index: 2;
+}
+
+@keyframes fadeInScale {
+  0% { opacity:0; transform: scale(0.6) rotate(-15deg);}
+  50% { transform: scale(1.05) rotate(5deg);}
+  100% { opacity:1; transform: scale(1) rotate(0deg);}
+}
+
+/* Headings */
+h2 {
+  margin-bottom: 20px;
+  color: #222;
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Switch buttons */
+.switch-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.switch-btns button {
+  width: 48%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 10px rgba(74,144,226,0.6);
+}
+.switch-btns button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 20px rgba(74,144,226,0.8), 0 0 40px rgba(74,144,226,0.5);
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  opacity: 0;
+  transform: translateY(20px) rotateX(15deg);
+  animation: formFlyIn 0.8s forwards;
+  animation-delay: 0.3s;
+}
+@keyframes formFlyIn {
+  to { opacity:1; transform: translateY(0) rotateX(0deg);}
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font-size: 14px;
+  color: var(--muted);
+}
+input, select, button[type="submit"] {
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  outline: none;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(8px);
+}
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(74,144,226,0.4);
+  transform: scale(1.02);
+}
+button[type="submit"] {
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 10px rgba(74,144,226,0.6);
+}
+button[type="submit"]:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 20px rgba(74,144,226,0.8), 0 0 40px rgba(74,144,226,0.5);
+}
+.hidden { display: none; }
+
+/* Abstract side shapes */
+.side-shape {
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(74,144,226,0.2);
+  filter: blur(80px);
+  animation: floatShape 20s ease-in-out infinite alternate;
+  z-index: 1;
+}
+.side-shape.left { top: 50px; left: -80px; }
+.side-shape.right { bottom: 50px; right: -80px; }
+@keyframes floatShape {
+  0% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(40px,-20px) scale(1.2); }
+  100% { transform: translate(0,0) scale(1); }
+}
+
+/* Floating particles */
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(74,144,226,0.5);
+  border-radius: 50%;
+  animation: floatParticles 6s linear infinite;
+}
+@keyframes floatParticles {
+  0% { transform: translateY(0) translateX(0) scale(0.5); opacity:0.4; }
+  50% { transform: translateY(-30px) translateX(20px) scale(1); opacity:1; }
+  100% { transform: translateY(0) translateX(0) scale(0.5); opacity:0.4; }
+}
+</style>
+</head>
+<body>
+
+<!-- Abstract side shapes -->
+<div class="side-shape left"></div>
+<div class="side-shape right"></div>
+
+<div class="container">
+  <h2>TA and LD Recruitment System</h2>
+  <div class="switch-btns">
+    <button onclick="showForm('login')">Login</button>
+    <button onclick="showForm('signup')">Signup</button>
+  </div>
+
+  <!-- Login Form -->
+  <form id="loginForm" action="/login" method="POST">
+    <div class="form-group">
+      <label>Username/ID</label>
+      <input type="text" name="username" required>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" required>
+    </div>
+    <div class="form-group">
+      <label>Access</label>
+      <select name="role" required>
+        <option value="admin">Admin</option>
+        <option value="teacher">Teacher</option>
+        <option value="student">Student</option>
+      </select>
+    </div>
+    <button type="submit">Login</button>
+  </form>
+
+  <form id="signupForm" class="hidden" action="/signup" method="POST" onsubmit="return validatePassword()">
+  <div class="form-group">
+    <label>Username/ID</label>
+    <input type="text" name="username" required>
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="signupPassword" name="password" required>
+    <small id="passwordError" style="color:red; display:none;"></small>
+  </div>
+  <div class="form-group">
+    <label>Access</label>
+    <select name="role" required>
+      <option value="student">Student</option>
+    </select>
+  </div>
+  <button type="submit">Signup</button>
+</form>
+
+  <!-- Floating particles -->
+  <div class="particle" style="top:20px; left:50px; animation-delay:0s;"></div>
+  <div class="particle" style="top:80px; left:150px; animation-delay:2s;"></div>
+  <div class="particle" style="top:120px; left:200px; animation-delay:4s;"></div>
+  <div class="particle" style="top:200px; left:80px; animation-delay:1s;"></div>
+</div>
+
+<script>
+function showForm(type) {
+  document.getElementById("loginForm").classList.add("hidden");
+  document.getElementById("signupForm").classList.add("hidden");
+  if(type==="login") document.getElementById("loginForm").classList.remove("hidden");
+  else document.getElementById("signupForm").classList.remove("hidden");
+}
+
+
+function validatePassword() {
+  const password = document.getElementById("signupPassword").value;
+  const error = document.getElementById("passwordError");
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  if (!regex.test(password)) {
+    error.textContent = "Password must be at least 8 characters, include uppercase, lowercase, number, and special character.";
+    error.style.display = "block";
+    return false; // prevent form submission
+  } else {
+    error.style.display = "none";
+    return true; // allow form submission
+  }
+}
+
+
+const loginBtn = document.querySelector(".switch-btns button:nth-child(1)");
+const signupBtn = document.querySelector(".switch-btns button:nth-child(2)");
+const container = document.querySelector(".container");
+
+function showForm(type) {
+  const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
+
+  // Add rotation animation
+  container.style.transition = "transform 0.6s ease";
+  container.style.transform = "rotateY(180deg)";
+
+  setTimeout(() => {
+    loginForm.classList.add("hidden");
+    signupForm.classList.add("hidden");
+
+    if(type === "login") loginForm.classList.remove("hidden");
+    else signupForm.classList.remove("hidden");
+
+    // Reset rotation
+    container.style.transform = "rotateY(0deg)";
+  }, 300); // rotate halfway then swap forms
+
+  // Button highlight
+  if(type === "login") {
+    loginBtn.style.background = "var(--accent)";
+    signupBtn.style.background = "rgba(74,144,226,0.5)";
+  } else {
+    signupBtn.style.background = "var(--accent)";
+    loginBtn.style.background = "rgba(74,144,226,0.5)";
+  }
+}
+
+// Initial highlight
+loginBtn.style.background = "var(--accent)";
+signupBtn.style.background = "rgba(74,144,226,0.5)";
+</script>
+</body>
+</html>

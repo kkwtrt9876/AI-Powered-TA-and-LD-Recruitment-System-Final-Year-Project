@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TA Results — {{ username }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root {
+  --bg: #e0e4e8;
+  --card: #f9f9fb;
+  --accent: #4a90e2;
+  --muted: #555;
+  --radius: 16px;
+  --shadow: 4px 4px 12px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.7);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+}
+
+header {
+  width: 100%;
+  background: linear-gradient(135deg, #ffffff, #d1d5db);
+  border-radius: var(--radius);
+  padding: 20px 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #222;
+}
+
+.course {
+  background: linear-gradient(145deg, #ffffff, #e3e6eb);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #222;
+}
+
+.course:hover {
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 16px rgba(0,0,0,0.15), -6px -6px 16px rgba(255,255,255,0.6);
+}
+
+.section {
+  margin-left: 20px;
+  margin-top: 15px;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.02);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.section:hover {
+  background: #f8f9fa;
+}
+
+.hidden { display: none; }
+
+.table-wrap {
+  margin-top: 15px;
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  color: #222;
+}
+
+th {
+  background: #f1f3f5;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+tr:hover td {
+  background: #fcfcfc;
+}
+
+.tag {
+  padding: 4px 10px;
+  background: var(--accent);
+  border-radius: 20px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.radio-btn {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.selected-row {
+  background: #ebf5ff !important;
+}
+
+.selected-row td {
+  border-bottom-color: #bad9ff;
+}
+
+.submit-btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+a.view-assets {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(74, 144, 226, 0.1);
+  transition: 0.2s;
+}
+
+a.view-assets:hover {
+  background: rgba(74, 144, 226, 0.2);
+}
+</style>
+
+<script>
+function toggle(id) {
+  let el = document.getElementById(id);
+  el.classList.toggle("hidden");
+}
+
+function selectRadio(radio) {
+  const table = radio.closest("table");
+  const radios = table.querySelectorAll("input[type='radio']");
+  const row = radio.closest("tr");
+
+  if(radio.classList.contains("selected")) {
+    radio.checked = false;
+    radio.classList.remove("selected");
+    row.classList.remove("selected-row");
+  } else {
+    radios.forEach(r => {
+      r.classList.remove("selected");
+      r.checked = false;
+      r.closest("tr").classList.remove("selected-row");
+    });
+    radio.checked = true;
+    radio.classList.add("selected");
+    row.classList.add("selected-row");
+  }
+
+  const anySelected = Array.from(radios).some(r => r.classList.contains("selected"));
+  row.closest("form").querySelector("button[type='submit']").disabled = !anySelected;
+}
+
+window.onload = function() {
+  document.querySelectorAll("input[type='radio']").forEach(radio => {
+    if(radio.dataset.acceptance == "1") {
+      radio.classList.add("selected");
+      radio.checked = true;
+      radio.closest("tr").classList.add("selected-row");
+      const form = radio.closest("form");
+      if(form) form.querySelector("button[type='submit']").disabled = false;
+    }
+  });
+};
+</script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>TA Selection Results — {{ username }}</h1>
+  </header>
+
+{% for course_name, sections in courses.items() %}
+  <div class="course" onclick="toggle('course_{{ loop.index }}')">
+    <strong>{{ course_name }}</strong>
+    <span class="tag">{{ sections|length }} sections</span>
+  </div>
+
+  <div id="course_{{ loop.index }}" class="hidden">
+    {% set outer_index = loop.index %}
+    {% for sec in sections %}
+      {% set sec_index = loop.index %}
+
+      <div class="section" onclick="toggle('sec_{{ outer_index }}_{{ sec_index }}')">
+        <strong>Section: {{ sec.section }}</strong>
+        <span style="color:var(--accent); font-size:12px; font-weight:600; margin-left:10px;">Click to toggle candidates</span>
+      </div>
+
+      <div id="sec_{{ outer_index }}_{{ sec_index }}" class="hidden">
+        <div class="table-wrap">
+          {% set data = results_data[course_name][sec.section] %}
+          {% if data|length == 0 %}
+            <div style="padding:20px; color:var(--muted); text-align:center; background:white;">No applications received for this section.</div>
+          {% else %}
+            <form method="POST" action="/update_acceptance/{{ username }}">
+              <input type="hidden" name="semester" value="{{ sec.sem_id }}">
+              <input type="hidden" name="course_code" value="{{ sec.column_name }}">
+              <input type="hidden" name="section" value="{{ sec.section }}">
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Student ID</th>
+                    <th>Time Applied</th>
+                    <th>GPA</th>
+                    <th>Grade</th>
+                    <th>Seniority</th>
+                    <th>Artifacts</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for r in data %}
+                  <tr>
+                    <td><strong>#{{ r.rank_ }}</strong></td>
+                    <td>{{ r.student_id }}</td>
+                    <td style="font-size:12px; color:#666;">{{ r.time_apply }}</td>
+                    <td>{{ r.gpa }}</td>
+                    <td><span class="tag" style="background:#6c757d;">{{ r.grade }}</span></td>
+                    <td>{{ r.seniority }}</td>
+                    <td>
+                      {% if r.submission_files_path %}
+                        <a href="/view_submission/{{ r.submission_files_path | replace('\\', '/') }}" target="_blank" class="view-assets">View Assets</a>
+                      {% else %}
+                        <span style="color:#ccc; font-size:11px;">No Assets</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <input type="radio" name="selected_student" value="{{ r.student_id }}"
+                             class="radio-btn" data-acceptance="{{ r.acceptance }}"
+                             onclick="selectRadio(this)">
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              <div style="text-align:right; padding-right:20px;">
+                <button type="submit" class="submit-btn" disabled>Assign Selected Student</button>
+              </div>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+    {% endfor %}
+  </div>
+{% endfor %}
+</div>
+</body>
+</html>

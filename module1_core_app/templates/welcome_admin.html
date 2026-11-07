@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome Admin</title>
+
+  <style>
+    :root{
+      --bg:#e0e4e8;       
+      --card:#f9f9fb;     
+      --accent:#4a90e2;   
+      --muted:#555;       
+      --radius:16px;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background: var(--bg);
+      color: var(--muted);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:32px;
+      transition: transform 1s ease, opacity 1s ease;
+      transform-origin: center center;
+    }
+
+    header{
+      width:100%;
+      max-width:960px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+      background: linear-gradient(135deg, #ffffff, #d1d5db);
+      border-radius: var(--radius);
+      padding: 16px 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 1s ease, opacity 1s ease;
+    }
+
+    header h1{
+      font-size:22px;
+      font-weight:700;
+      margin:0;
+      color: #222;
+    }
+
+    .logout-btn {
+      background: var(--accent);
+      color:white;
+      padding:8px 16px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+      transition:0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .logout-btn:hover {
+      background: #357abd;
+    }
+
+    .tiles{
+      width:100%;
+      max-width:960px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:20px;
+      margin-top:20px;
+      transition: transform 1s ease, opacity 1s ease;
+    }
+
+    .tile{
+      background: linear-gradient(145deg, #ffffff, #e3e6eb);
+      padding:28px;
+      border-radius:var(--radius);
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.7);
+      border:1px solid rgba(0,0,0,0.05);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:18px;
+      font-weight:600;
+      color: #222;
+
+      opacity:0;
+      transform: translateY(20px);
+      animation: flyIn 0.8s forwards;
+    }
+
+    .tile:hover{
+      transform: translateY(-5px);
+      box-shadow: 6px 6px 16px rgba(0,0,0,0.15), -6px -6px 16px rgba(255,255,255,0.6);
+    }
+
+    @keyframes flyIn {
+      to {
+        opacity:1;
+        transform: translate(0,0);
+      }
+    }
+
+    /* Logout Animation */
+    .logout-animate {
+      transform: scale(0) rotate(720deg);
+      opacity:0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Welcome Admin</h1>
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+  </header>
+
+  <div class="tiles">
+
+    <div class="tile" onclick="location.href='/upload_Courses'">
+      Upload TA Sheet
+    </div>
+
+    <div class="tile" onclick="location.href='/launch_selection'">
+      Launch the Selection for the LD's
+    </div>
+
+    <div class="tile" onclick="location.href='/launch_selection_TA'">
+      Launch the Selection for the TA's
+    </div>
+
+    <div class="tile" onclick="location.href='/view_results'">
+      View Results of LD
+    </div>
+
+    <div class="tile" onclick="location.href='/view_ta_results_admin'">
+      View Results of TA
+    </div>
+
+    <div class="tile" onclick="location.href='/upload_labs'">
+      Upload Ld Sheet
+    </div>
+
+  </div>
+
+  <script>
+    // Stagger animation like student dashboard
+    const tiles = document.querySelectorAll('.tile');
+    const directions = ['-100px', '100px', '-100px', '100px', '-50px'];
+    tiles.forEach((tile, index) => {
+      tile.style.opacity = 0;
+      tile.style.transform = `translate(${directions[index % directions.length]}, ${directions[index % directions.length]})`;
+      tile.style.animation = `flyIn 0.8s ${index * 0.15}s forwards`;
+    });
+
+    // Logout animation
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.body.classList.add('logout-animate');
+      document.querySelectorAll('header, .tiles').forEach(el => el.classList.add('logout-animate'));
+      
+      setTimeout(() => {
+        window.location.href = '/logout';
+      }, 1000);
+    });
+  </script>
+
+</body>
+</html>

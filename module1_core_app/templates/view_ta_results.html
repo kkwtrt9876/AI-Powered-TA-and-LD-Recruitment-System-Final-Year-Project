@@ -1,0 +1,135 @@
+<!-- view_ta_results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TA Allocation Results</title>
+
+<style>
+:root{
+  --bg:#e0e4e8;
+  --card:#f9f9fb;
+  --accent:#4a90e2;
+  --muted:#333;
+  --radius:16px;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  padding:32px;
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  color:var(--muted);
+}
+
+/* Metallic Header */
+header{
+  width:100%;
+  max-width:960px;
+  background:linear-gradient(135deg, #ffffff, #d1d5db);
+  padding:20px;
+  text-align:center;
+  font-size:24px;
+  font-weight:700;
+  border-radius:var(--radius);
+  color:#222;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom:25px;
+}
+
+/* Metallic Container */
+.container{
+  width:100%;
+  max-width:960px;
+  background:linear-gradient(145deg, #ffffff, #e3e6eb);
+  padding:30px;
+  border-radius:var(--radius);
+  box-shadow:
+    4px 4px 12px rgba(0,0,0,0.1),
+    -4px -4px 12px rgba(255,255,255,0.7);
+  border:1px solid rgba(0,0,0,0.05);
+}
+
+/* Table Metallic */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:white;
+  box-shadow:
+    4px 4px 12px rgba(0,0,0,0.1),
+    -4px -4px 12px rgba(255,255,255,0.7);
+}
+
+th{
+  background: linear-gradient(135deg, #ffffff, #d1d5db);
+  padding:12px;
+  color:#222;
+  border-bottom:1px solid rgba(0,0,0,0.1);
+  font-weight:600;
+}
+
+td{
+  padding:12px;
+  border-bottom:1px solid rgba(0,0,0,0.08);
+  color:#222;
+  text-align:center;
+}
+
+/* Flash/Message Metallic */
+.message{
+  margin-top:20px;
+  font-size:18px;
+  font-weight:700;
+  color:#d9534f;
+  text-align:center;
+  padding:15px;
+  border-radius:var(--radius);
+  background:linear-gradient(145deg, #ffffff, #fcecec);
+  box-shadow:
+    3px 3px 8px rgba(0,0,0,0.1),
+    -3px -3px 8px rgba(255,255,255,0.7);
+  border:1px solid #ff5c5c;
+}
+</style>
+</head>
+<body>
+
+<header>TA Allocation Results</header>
+
+<div class="container">
+
+{% if results %}
+<table>
+<tr>
+<th>Course Name</th>
+<th>Instructor</th>
+<th>Section</th>
+<th>Semester</th>
+</tr>
+{% for row in results %}
+<tr>
+<td>{{ row.course_name }}</td>
+<td>{{ row.course_instructor }}</td>
+<td>{{ row.section }}</td>
+<td>{{ row.sem_id }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% else %}
+<div class="message">No TA allocations found for you this semester.</div>
+{% endif %}
+
+</div>
+</body>
+</html>

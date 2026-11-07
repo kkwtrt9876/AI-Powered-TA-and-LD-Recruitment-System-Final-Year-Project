@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+  <meta charset="UTF-8">
+  <title>Update Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 700px;
+      position: relative;
+    }
+    h2, h3 {
+      text-align: center;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      font-weight: bold;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .edit-btn {
+      background: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 8px 15px;
+      margin-top: 10px;
+    }
+    .add-semester-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    /* Semester Card Styles */
+    #semestersList {
+      margin-top: 20px;
+    }
+    .semester-card {
+      background: #f9f9f9;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .semester-card:hover {
+      transform: scale(1.02);
+      background: #f1f1f1;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none; /* hidden by default */
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    th {
+      background: #007BFF;
+      color: white;
+    }
+
+    .flash {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .flash.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .flash.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Update Profile</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div>
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="form-group">
+        <label for="department">Department</label>
+        
+        {% if department %}
+          <!-- Existing student -->
+          {% if editable %}
+            <select name="department" required>
+              {% for dep in departments %}
+                <option value="{{ dep.dep_id }}" {% if dep.dep_name == department %}selected{% endif %}>
+                  {{ dep.dep_name }}
+                </option>
+              {% endfor %}
+            </select>
+          {% else %}
+            <p>{{ department }}</p>
+            <button type="submit" name="edit" value="true" class="edit-btn">Edit</button>
+          {% endif %}
+        
+        {% else %}
+          <!-- New student -->
+          <select name="department" required>
+            {% for dep in departments %}
+              <option value="{{ dep.dep_name }}">{{ dep.dep_name }}</option>
+            {% endfor %}
+          </select>
+        {% endif %}
+      </div>
+      
+      {% if not department or editable %}
+      <button type="submit" name="save" value="true">Save</button>
+      {% endif %}
+    </form>
+
+    <!-- Add Semester button -->
+    <button class="add-semester-btn" onclick="openModal()">Add Semester</button>
+
+    <h3>Saved Semesters</h3>
+    <div id="semestersList">
+      {% for sem, data in semester_courses.items() %}
+        <div class="semester-card" onclick="openSemesterModal('{{ sem }}')">
+          <strong>{{ sem }}</strong>
+        </div>
+
+        <!-- Modal for each semester -->
+        <div id="modal_{{ sem }}" class="modal">
+          <div class="modal-content">
+            <span class="close" onclick="closeSemesterModal('{{ sem }}')">&times;</span>
+            <h3>{{ sem }}</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Course Name</th>
+                  <th>Credit Hours</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course in data if course is mapping %} 
+                <tr>
+                  <td>{{ course.course }}</td>
+                  <td>{{ course.credit }}</td>
+                  <td>{{ course.grade }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <p><strong>SGPA:</strong> {{ data[-1] }}</p>
+            <button class="edit-btn"
+                    data-sem="{{ sem }}"
+                    data-courses='{{ data | tojson | safe }}'
+                    onclick="editSemester(this)">
+              Edit
+            </button>
+
+            <button class="delete-btn"
+                    data-sem="{{ sem }}"
+                    data-username="{{ username }}"
+                    onclick="deleteSemester(this)">
+              Delete
+            </button>
+
+
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <h3>CGPA</h3>
+      <p style="text-align:center; font-size: 18px; font-weight: bold;">
+        {{ cgpa }}
+      </p>
+
+
+  </div>
+
+  <!-- Add/Edit Semester Modal -->
+  <div id="semesterModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3 id="semesterModalTitle">Add Semester</h3>
+      <form id="semesterForm" method="POST" action="/add_semester/{{ username }}">
+        
+        <!-- Hidden fields for edit mode -->
+        <input type="hidden" name="edit_mode" id="editMode" value="false">
+        <input type="hidden" name="edit_semester_id" id="editSemesterId" value="">
+
+        <div class="form-group">
+          <label for="semester_id">Semester</label>
+          <select name="semester_id" required>
+            {% for sem in semester_ids %}
+              <option value="{{ sem.semester_id }}">{{ sem.semester_id }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <h4>Courses</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Course Name</th>
+              <th>Credit Hours</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in range(10) %}
+            <tr>
+              <td>
+                <select name="course_{{ i }}" class="course-select">
+                <option value="">None</option>
+                {% for course in courses %}
+                  <option value="{{ course.column_name }}">{{ course.name }}</option>
+                {% endfor %}
+              </select>
+
+              </td>
+              <td>
+                <select name="credit_{{ i }}">
+                  <option value="3">3</option>
+                  <option value="2">2</option>
+                  <option value="1">1</option>
+                </select>
+              </td>
+              <td>
+                <select name="grade_{{ i }}">
+                  <option value="A+">A+</option>
+                  <option value="A">A</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B">B</option>
+                  <option value="B-">B-</option>
+                  <option value="C+">C+</option>
+                  <option value="C">C</option>
+                  <option value="C-">C-</option>
+                  <option value="D+">D+</option>
+                  <option value="D">D</option>
+                  <option value="F">F</option>  
+                </select>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        
+
+        <br>
+        <button type="submit">Save Semester</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+document.getElementById("semesterForm").addEventListener("submit", function(event) {
+    const courseSelects = document.querySelectorAll(".course-select");
+    let hasCourse = false;
+
+    courseSelects.forEach(select => {
+        if (select.value !== "") {  // not "None"
+            hasCourse = true;
+        }
+    });
+
+    if (!hasCourse) {
+        event.preventDefault(); // stop form submission
+        alert("Please select at least one course before submitting.");
+    }
+});
+</script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const selects = document.querySelectorAll(".course-select");
+
+      function updateOptions() {
+        const selected = Array.from(selects)
+          .map(s => s.value)
+          .filter(v => v !== "");
+
+        selects.forEach(select => {
+          Array.from(select.options).forEach(option => {
+            if (option.value && selected.includes(option.value) && option.value !== select.value) {
+              option.disabled = true;
+            } else {
+              option.disabled = false;
+            }
+          });
+        });
+      }
+
+      selects.forEach(select => {
+        select.addEventListener("change", updateOptions);
+      });
+
+      updateOptions();
+    });
+
+    function openSemesterModal(sem) {
+      document.getElementById("modal_" + sem).style.display = "block";
+    }
+    function closeSemesterModal(sem) {
+      document.getElementById("modal_" + sem).style.display = "none";
+    }
+    function openModal() {
+      document.getElementById("semesterModal").style.display = "block";
+      
+      document.getElementById("semesterModalTitle").innerText = "Add Semester";
+      document.getElementById("editMode").value = "false";
+      document.getElementById("editSemesterId").value = "";
+
+      let courseSelects = document.querySelectorAll("select[name^='course_']");
+      let creditSelects = document.querySelectorAll("select[name^='credit_']");
+      let gradeSelects = document.querySelectorAll("select[name^='grade_']");
+      let sgpaInput = document.querySelector("input[name='sgpa']");
+
+      courseSelects.forEach(s => s.value = "");
+      creditSelects.forEach(s => s.value = "3");
+      gradeSelects.forEach(s => s.value = "A");
+      if (sgpaInput) sgpaInput.value = "";
+    }
+    function closeModal() {
+      document.getElementById("semesterModal").style.display = "none";
+    }
+    window.onclick = function(event) {
+      let modals = document.querySelectorAll(".modal");
+      modals.forEach(m => {
+        if (event.target == m) {
+          m.style.display = "none";
+        }
+      });
+    }
+
+    function editSemester(button) {
+        const sem = button.getAttribute("data-sem");
+        const data = JSON.parse(button.getAttribute("data-courses"));
+
+        openModal();
+
+        document.getElementById("semesterModalTitle").innerText = "Edit Semester";
+        document.getElementById("editMode").value = "true";
+        document.getElementById("editSemesterId").value = sem;
+
+        let semSelect = document.querySelector("select[name='semester_id']");
+        if (semSelect) {
+            semSelect.value = sem;
+        }
+
+        data.forEach((courseObj, i) => {
+            if (typeof courseObj === "object") {
+                let courseSelect = document.querySelector(`select[name='course_${i}']`);
+                let creditSelect = document.querySelector(`select[name='credit_${i}']`);
+                let gradeSelect = document.querySelector(`select[name='grade_${i}']`);
+
+                // 🔹 Handle course column_name vs. name
+                if (courseSelect) {
+                    let val = courseObj.course; // might be column_name or name
+
+                    // Try direct match on value (column_name)
+                    let exists = [...courseSelect.options].some(opt => opt.value === val);
+
+                    if (exists) {
+                        courseSelect.value = val;
+                    } else {
+                        // Try match on visible text (course name)
+                        let match = [...courseSelect.options].find(opt => opt.text === val);
+                        if (match) {
+                            courseSelect.value = match.value; // ✅ ensures backend gets column_name
+                        } else {
+                            // 🔹 Force add new option if no match at all
+                            let newOption = new Option(val, val, true, true);
+                            courseSelect.add(newOption);
+                            courseSelect.value = val;
+                        }
+                    }
+                }
+
+                if (creditSelect) creditSelect.value = courseObj.credit;
+                if (gradeSelect) gradeSelect.value = courseObj.grade;
+            }
+        });
+
+        let sgpaInput = document.querySelector("input[name='sgpa']");
+        if (sgpaInput) sgpaInput.value = data[data.length - 1];
+    }
+
+
+    function deleteSemester(button) {
+    const sem = button.getAttribute("data-sem");
+    const username = button.getAttribute("data-username");
+
+    if (!confirm(`Are you sure you want to delete Semester ${sem}?`)) {
+        return;
+    }
+
+    fetch("/delete_semester", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username, sem: sem })
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.success) {
+            alert("Semester deleted successfully!");
+            window.location.reload();  // 🔄 refresh page
+        } else {
+            alert("Failed to delete semester.");
+        }
+    })
+    .catch(err => console.error("Error deleting semester:", err));
+}
+
+
+
+  </script>
+</body>
+</html>

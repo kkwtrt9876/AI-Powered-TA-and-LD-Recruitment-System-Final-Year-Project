@@ -1,0 +1,8 @@
+groq
+chromadb==0.5.5
+sentence-transformers==2.2.2
+pandas
+python-dotenv
+openpyxl
+streamlit
+

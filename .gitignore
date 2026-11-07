@@ -1,0 +1,80 @@
+# ============================================================
+#  .gitignore — AI-Powered TA & LD Recruitment System
+# ============================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+ENV/
+
+# --- Environment / Secrets ---
+.env
+*.env
+.env.local
+.env.production
+
+# --- Model files (too large for GitHub — use Git LFS or separate hosting) ---
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+*.h5
+
+# --- Jupyter Notebook checkpoints ---
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Submission artifacts (runtime-generated) ---
+submissions/
+tmp_*/
+
+# --- ChromaDB vector store (regenerate with ingest.py) ---
+module2_rag_chatbot/chroma_store/
+
+# --- ffmpeg binaries (download separately) ---
+ffmpeg.exe
+ffprobe.exe
+
+# --- Audio / Video interview samples ---
+*.wav
+*.mp4
+*.webm
+*.mp3
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Temporary files ---
+*.tmp
+*.bak
+*.orig
+tempCodeRunnerFile.py
