@@ -25,13 +25,13 @@ else:
 client = Groq(api_key=GROQ_API_KEY)
 analyzer = BehavioralAnalyzer()
 
-# Database connection to flask_app
+# Database connection — configure via environment variables in .env
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="27042019",  # As seen in fyp_module1 app.py
-    database="flask_app",
-    port=3306,
+    host=os.getenv("DB_HOST", "localhost"),
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD", ""),    # set DB_PASSWORD in your .env
+    database=os.getenv("DB_NAME", "flask_app"),
+    port=int(os.getenv("DB_PORT", "3306")),
     buffered=True
 )
 

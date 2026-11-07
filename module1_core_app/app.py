@@ -27,7 +27,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.secret_key = "supersecretkey123"   # 👈 Add this line
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me-in-production")
 app.permanent_session_lifetime = timedelta(minutes=30)
 
 from functools import wraps
@@ -64,14 +64,14 @@ def session_timeout():
         session["last_active"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-# DB connection
+# DB connection — configure via environment variables in .env
 db = mysql.connector.connect(
-    host="localhost",       # or "127.0.0.1"
-    user="root",            # root user
-    password="27042019",  # replace with your actual MySQL root password
-    database="flask_app",   # your database name
-    port=3306,
-    buffered=True               # optional, 3306 is default
+    host=os.getenv("DB_HOST", "localhost"),
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD", ""),    # set DB_PASSWORD in your .env
+    database=os.getenv("DB_NAME", "flask_app"),
+    port=int(os.getenv("DB_PORT", "3306")),
+    buffered=True
 )
 
 cursor = db.cursor(dictionary=True)
