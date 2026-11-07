@@ -19,7 +19,7 @@
 - [Environment Variables](#-environment-variables)
 - [Running Each Module](#-running-each-module)
 - [Screenshots & Demo](#-screenshots--demo)
-- [Team](#-team)
+- [License](#-license)
 
 ---
 
@@ -351,19 +351,6 @@ The behavioral analysis models are **not included** in this repository due to th
 Training notebooks are located in `Ep-Y-Fe - Final/models/` in the original project.
 
 > To use the models, place them in `module1_core_app/models/iemocap trained files/` and `module1_core_app/models/ravdess/`.
-
----
-
-## 👥 Team
-
-**Final Year Project — FAST-NUCES**
-
-| Member | Role |
-|---|---|
-| Team Member 1 | Module 1: Core App & LD Automation |
-| Team Member 2 | Module 2: RAG Chatbot |
-| Team Member 3 | Module 3: Audio Behavioral Analysis |
-| Team Member 4 | Module 4: Question Generation & Verification |
 
 ---
 
